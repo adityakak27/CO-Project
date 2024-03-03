@@ -1,21 +1,22 @@
+
 import re
 from dictionaries import * #importing dictionaries from dictionaries.py to avoid cluttering of code
 
 
 
 
-# Define a function to convert a decimal number to a binary string with specified width
+#define a function to convert from decimal to binary with given width
 def bin(dec_num, width):
     return format(dec_num, '0' + str(width) + 'b')
 
 
 
 
-#Functions to assemble all types of instructions (R, I, S, B, U, J)
+#functions to assemble all types of instructions (R, I, S, B, U, J)
 def assemble_r_type(instruction, rd, rs1, rs2):
     opcode = opcode_dict[instruction]
     funct3 = functions_dict[instruction]
-    funct7 = "0000000"  # Default value for R-type
+    funct7 = "0000000"  #default
     return funct7 + bin(rs2, 5) + bin(rs1, 5) + funct3 + bin(rd, 5) + opcode
 
 
@@ -63,7 +64,7 @@ def assemble_j_type(instruction, rd, imm):
 
 
 
-#Functions to parse assembly instructions and assemble them
+#functions to parse assembly instructions and assemble them
 def parse_instruction(line):
     line = line.strip()
     tokens = re.split(r'[,\s]+', line)
@@ -74,67 +75,67 @@ def parse_instruction(line):
 
 def assemble_instruction(instruction, operands, symbol_table):
     if instruction not in instructions_Dictionary:
-        return None  # Invalid instruction
+        return None  #invalid instruction
 
     if not all(op in registers_Dictionary for op in operands):
-        return None  # Invalid register name
+        return None  #invalid reg name
 
     if instruction in ["add", "sub", "sll", "slt", "sltu", "xor", "srl", "or", "and",
                        "mul", "rst", "halt", "rvrs", "div", "rem"]:  
         if len(operands) != 3:
-            return None  # Incorrect number of operands
+            return None  #incorrect no of operands
         rd, rs1, rs2 = map(int, operands)
         return assemble_r_type(instruction, rd, rs1, rs2)
 
     elif instruction in ["lw", "addi", "sltiu", "jalr"]:
         if len(operands) != 3:
-            return None  # Incorrect number of operands
+            return None  #incorrect no of operands
         rd, rs1 = map(int, operands[:2])
         imm = int(operands[2])
         if abs(imm) >= 2**12:
-            return None  # Illegal immediate value
+            return None  #illegal imm value
         return assemble_i_type(instruction, rd, rs1, imm)
 
     elif instruction == "sw":
         if len(operands) != 3:
-            return None  # Incorrect number of operands
+            return None  #incorrect no of operands
         rs1, rs2 = map(int, operands[:2])
         imm = int(operands[2])
         if abs(imm) >= 2**12:
-            return None  # Illegal immediate value
+            return None  #illegal imm value
         return assemble_s_type(instruction, rs1, rs2, imm)
 
     elif instruction in ["beq", "bne", "blt", "bge", "bltu", "bgeu"]:
         if len(operands) != 3:
-            return None  # Incorrect number of operands
+            return None  #incorrect no of operands
         rs1, rs2 = map(int, operands[:2])
         label = operands[2]
         imm = symbol_table[label] - len(symbol_table)
         if abs(imm) >= 2**12:
-            return None  # Illegal immediate value
+            return None  #illegal imm value
         return assemble_b_type(instruction, rs1, rs2, imm)
 
     elif instruction in ["lui", "auipc"]:
         if len(operands) != 2:
-            return None  # Incorrect number of operands
+            return None  #incorrect no of operands
         rd = int(operands[0])
         imm = int(operands[1])
         if abs(imm) >= 2**20:
-            return None  # Illegal immediate value
+            return None  #illegal imm value
         return assemble_u_type(instruction, rd, imm)
 
     elif instruction == "jal":
         if len(operands) != 2:
-            return None  # Incorrect number of operands
+            return None  #incorrect no of operands
         rd = int(operands[0])
         label = operands[1]
         imm = symbol_table[label] - len(symbol_table)
         if abs(imm) >= 2**20:
-            return None  # Illegal immediate value
+            return None  #illegal imm value
         return assemble_j_type(instruction, rd, imm)
 
     else:
-        return None  # Invalid instruction
+        return None  #invalid instruction
 
 
 
@@ -143,12 +144,12 @@ def assemble_instruction(instruction, operands, symbol_table):
 
 
 
-#Assemble the entire program
+#assemble the program
 def assemble_program(input_file, output_file):
     symbol_table = {}
     binary_code = []
 
-    #Building symbol table
+    #building symbol table
     with open(input_file, 'r') as file:
         for line_number, line in enumerate(file, 1):
             line = line.strip()
@@ -164,7 +165,7 @@ def assemble_program(input_file, output_file):
                 symbol_table[label] = len(binary_code)
                 tokens = tokens[1:]
 
-    #Assembling instructions
+    #assembling instructions
     with open(input_file, 'r') as file:
         for line_number, line in enumerate(file, 1):
             line = line.strip()
@@ -178,12 +179,12 @@ def assemble_program(input_file, output_file):
                 return
             binary_code.append(binary_instruction)
 
-    #Check if Virtual Halt is last instruction
+    #check if virtual halt is last instruction
     if binary_code[-1] != opcode_dict["halt"]:
         print("Error: Virtual Halt instruction must be used as the last instruction")
         return
 
-    #Write binary output to output file
+    #write binary output to output file
     with open(output_file, 'w') as file:
         for instruction in binary_code:
             file.write(instruction + '\n')
@@ -192,7 +193,7 @@ def assemble_program(input_file, output_file):
 
 
 
-#MDriver code
+#driver code
 if __name__ == "__main__":
     input_file = "input.asm"
     output_file = "output.txt"
