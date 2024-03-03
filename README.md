@@ -1,6 +1,6 @@
 # CO-Project
 
-This is a file to keep track of all the changes and updates in the project.
+This is a repository to keep track of all the changes and updates in the project.
 
 Group Members are : Anoushka Sahoo, Aditya Malik, Aditi Kumar, & Aditya Kak.
 
