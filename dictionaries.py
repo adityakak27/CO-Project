@@ -1,12 +1,17 @@
-#Define instruction and register names
+#define instruction names
 instructions_Dictionary = ["add", "sub", "sll", "slt", "sltu", "xor", "srl", "or", "and",
                       "lw", "addi", "sltiu", "jalr", "sw", "beq", "bne", "blt",
                       "bge", "bltu", "bgeu", "lui", "auipc", "jal", "mul", "rst",
                       "halt", "rvrs", "div", "rem"]
 
-registers_Dictionary = ["x" + str(i) for i in range(32)]
 
-#Define dictionaries for opcode and funct3 encoding
+#modified registers dictionary with their address values
+registers_Dictionary = {"zero":"00000", "ra":"00001", "sp":"00010", "tp":"00100", "gp":"00011", "t0":"00101", "t1":"00110", "t2":"00111", 
+    "fp":"01000", "s1":"01001", "a0":"01010", "a1":"01011", "a2":"001100", "a3":"001101", "a4":"001110", "a5":"001111", "a6":"10000", 
+    "a7":"10001", "s2":"10010", "s3":"10011", "s4":"10100", "s5":"10101", "s6":"10110", 
+    "s7":"10111", "s8":"11000", "s9":"11001", "s10":"11010", "s11":"11011", "t3":"11100", "t4":"11101", "t5":"11110", "t6":"11111" }
+
+#define dictionaries for opcode and funct3 codes
 opcode_dict = {
     "add": "0110011", "sub": "0110011", "sll": "0110011",
     "slt": "0110011", "sltu": "0110011", "xor": "0110011",
