@@ -183,7 +183,7 @@ def assemble_program(input_file, output_file):
                 break
 
     if not vHalt_found:
-        print("Error: Virtual Halt Command not found or not the last command. Please recheck.") #error message to user;
+        print("Error: Virtual Halt Command not found. Please recheck.") #error message to user;
         return
 
     with open(output_file, 'w') as file:
