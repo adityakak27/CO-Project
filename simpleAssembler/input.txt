@@ -1,0 +1,2 @@
+add a0,t0,t1
+beq zero, zero, 0
