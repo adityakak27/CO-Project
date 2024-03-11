@@ -17,7 +17,10 @@ def binary(number, size = 12): #default size set to 12; specified otherwise if n
 def assemble_r_type(instruction, rd, rs1, rs2):
     opcode = opcode_dict[instruction]
     funct3 = functions_dict[instruction]
-    funct7 = "0000000" #default
+    if instruction == 'sub':
+        funct7 = "0100000" #default
+    else:
+        funct7 = "0000000" #default
     return funct7 + registers_Dictionary[rs2] + registers_Dictionary[rs1] + funct3 + registers_Dictionary[rd] + opcode
 
 def assemble_i_type(instruction, rd, rs1, imm):
@@ -183,7 +186,7 @@ def assemble_program(input_file, output_file):
                 break
 
     if not vHalt_found:
-        print("Error: Virtual Halt Command not found. Please recheck.") #error message to user;
+        print("Error: Virtual Halt Command Not Found.") #error message to user;
         return
 
     with open(output_file, 'w') as file:
