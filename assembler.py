@@ -6,8 +6,12 @@ from dictionaries import * #importing dictionaries from dictionaries.py to avoid
 
 
 #define a function to convert from decimal to binary with given width
-def bin(dec_num, width):
-    return format(dec_num, '0' + str(width) + 'b')
+def binary(number, size = 12):
+    if number < 0:
+        number = 2 ** size + number
+    binary_string = bin(number)[2:]
+    padded_binary_string = binary_string.zfill(size)
+    return padded_binary_string #rewritten binary function with default size value 12
 
 
 
