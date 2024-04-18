@@ -27,7 +27,7 @@ def unsigned(value):    #Perform unsigned integer conversion.
     return value & 0xFFFFFFFF
 
 
-def mem_dump(mem_store, start_address, end_address, step = 4):
+def mem_dump(mem_store, start_address, end_address, f, step = 4):
     for address in range(start_address, end_address + 1, step):
         # Check if the address is in the dictionary
         if address in mem_store:
@@ -38,21 +38,24 @@ def mem_dump(mem_store, start_address, end_address, step = 4):
         # Format the data as 32-bit binary
         data_binary = format(data, '032b')
         # Print the address and the data
-        print(f"0x{address:08X}:0b{data_binary}")
+        f.write(f"0x{address:08X}:0b{data_binary}")
+        f.write('\n')
 
 
-def PC_dump(PC):    #Dump the program counter (PC) value.
+def PC_dump(PC, f):    #Dump the program counter (PC) value.
 
     PC_register = (list(binary(PC)))
     string = "".join(PC_register)
-    print(string, end=" ")
+    f.write(string + " ")
 
 
-def reg_dump(reg_value):    #Dump the register values.
+def reg_dump(reg_value, f):    #Dump the register values.
 
     for register in reg_value:
         if (register!='zero'):
-            print(binary(reg_value[register]), end=" ")
+            f.write(binary(reg_value[register]) + " ")
+
+    f.write('\n')
 
 
 def pc_update(PC):    #Update the program counter (PC) value.
@@ -256,6 +259,7 @@ if len(sys.argv) != 3:
 
 # Read input from the input file
 input_file = sys.argv[1]
+output_file = sys.argv[2]
 with open(input_file, 'r') as f:
     input_data = f.read().rstrip()
 
@@ -265,22 +269,23 @@ mem_store = {i: 0 for i in range(32)}
 PC = 4
 halt = False
 
+with open(output_file, 'w') as f:
 
-while not halt:
-    if len(instructions) == 0:
-        break
-
-    for i, Instruction in enumerate(instructions):
-        PC_dump(PC)
-        PC, mem_store, reg_value, halt = ee_execute(Instruction, PC, mem_store, reg_value)
-        PC = pc_update(PC)
-        reg_dump(reg_value)
-        print()
-
-        if halt:
+    while not halt:
+        if len(instructions) == 0:
             break
 
-    if PC >= len(instructions):
-        break
+        for i, Instruction in enumerate(instructions):
+            PC_dump(PC, f)
+            PC, mem_store, reg_value, halt = ee_execute(Instruction, PC, mem_store, reg_value)
+            PC = pc_update(PC)
+            reg_dump(reg_value, f)
+            print()
 
-mem_dump(mem_store, 0x0010000, 0x0001007C)
+            if halt:
+                break
+
+        if PC >= len(instructions):
+            break
+
+    mem_dump(mem_store, 0x0010000, 0x0001007C, f)
