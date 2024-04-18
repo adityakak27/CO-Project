@@ -180,6 +180,39 @@ def ee_execute(Instruction, PC, mem_store, reg_value):  #Execute the given instr
             if unsigned(rs1) >= unsigned(rs2):
                 PC += imm_value
 
+
+    elif opcode=="0110011":
+        rs2=Instruction[7:12]
+        rs1=Instruction[12:17]
+        rd=Instruction[20:25]
+
+        rs2_name=registers_Dictionary[rs2]
+        rs1_name=registers_Dictionary[rs1]
+        rd_name=registers_Dictionary[rd]
+
+        rs2_val=reg_value[rs2_name]
+        rs1_val=reg_value[rs1_name]
+        temp=rs2_val*rs1_val
+        reg_value[rd_name]=temp
+    
+    elif opcode=="0110111":
+        for i in reg_value.keys():
+            reg_value[i]=0
+    elif opcode=="0110111":
+        halt=True
+    elif opcode=="0110111":
+        rs1=Instruction[12:17]
+        rd=Instruction[20:25]
+        rd_name=registers_Dictionary[rd]
+        rs1_name=registers_Dictionary[rs1]
+
+        rs1_val=reg_value[rs1_name]
+        rs1_bin=binary(rs1_val)[::-1]
+
+        temp=int(rs1_bin,2)
+        reg_value[rd_name]=temp
+    
+    
      # S-type instruction handling
     elif opcode == '0100011':  # sw
         imm_11_5 = Instruction[0:7]
