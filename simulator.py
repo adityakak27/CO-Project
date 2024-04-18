@@ -1,17 +1,6 @@
 from dictionaries import *
 import sys
 
-def get_input():    #Get input instructions from the user.
-
-    print("Enter instructions (one per line, or 'exit' to quit):")
-    instructions = []
-    while True:
-        line = input()
-        if line.lower() == 'exit':
-            break
-        instructions.append(line)
-    return instructions
-
 def binary(number, size=32):    #Convert a number to binary representation with a specified size.
 
     if number < 0:
@@ -259,38 +248,18 @@ def ee_execute(Instruction, PC, mem_store, reg_value):  #Execute the given instr
     return PC, mem_store, reg_value, halt
 
 
-#instructions = get_input()
-
-instructions = ["00000000000000000000010010110011",
-"00000000000000000000100100110011",
-"00000000000100000000010010010011",
-"00000001000000000000100100010011",
-"00000001001001001001010010110011",
-"00000000101100000000101010010011",
-"00000001010101001010000000100011",
-"00000000000001001010100100000011",
-"00000000010001001000010010010011",
-"00000000000100000000100110010011",
-"00000001001110010111100100110011",
-"00000001001000000000100001100011",
-"00000000001100000000101000010011",
-"00000001010001001010000000100011",
-"00000000000000000000000001100011",
-"00000000001000000000101000010011",
-"00000001010001001010000000100011",
-"00000000000000000000000001100011"]
 
 # Check if the correct number of command line arguments are provided
-#if len(sys.argv) != 3:
- #   print("Usage: python file.py input_file.txt output_file.txt")
-  #  sys.exit(1)
+if len(sys.argv) != 3:
+    print("Usage: python file.py input_file.txt output_file.txt")
+    sys.exit(1)
 
 # Read input from the input file
-#input_file = sys.argv[1]
-#with open(input_file, 'r') as f:
-#    input_data = f.read().rstrip()
+input_file = sys.argv[1]
+with open(input_file, 'r') as f:
+    input_data = f.read().rstrip()
 
-#instructions = input_data.split("\n")
+instructions = input_data.split("\n")
 
 mem_store = {i: 0 for i in range(32)}
 PC = 4
