@@ -20,6 +20,16 @@ def convert_to_bin(number):     #Convert a number to 16-bit binary representatio
                 unused.append("0")
         binary_string = "".join(unused + b)
         return binary_string
+    
+def convert_to_hex(binary_str):    #convert 32-bit binary to 8-bit hex
+    binary_str = binary_str.zfill(((len(binary_str) + 3) // 4) * 4)
+
+    hex_str = hex(int(binary_str, 2))[2:].upper()
+
+    if len(hex_str) > 8:
+        hex_str = hex_str[-8:]
+
+    return hex_str.zfill(8)
 
 
 def unsigned(value):    #Perform unsigned integer conversion.
@@ -27,33 +37,33 @@ def unsigned(value):    #Perform unsigned integer conversion.
     return value & 0xFFFFFFFF
 
 
-def mem_dump(mem_store, start_address, end_address, f, step = 4):
-    for address in range(start_address, end_address + 1, step):
-        # Check if the address is in the dictionary
-        if address in mem_store:
-            data = mem_store[address]
-        else:
-            data = 0  # default value for uninitialized memory addresses
+# def mem_dump(mem_store, start_address, end_address, f, step = 4):
+#     for address in range(start_address, end_address + 1, step):
+#         # Check if the address is in the dictionary
+#         if address in mem_store:
+#             data = mem_store[address]
+#         else:
+#             data = 0  # default value for uninitialized memory addresses
 
-        # Format the data as 32-bit binary
-        data_binary = format(data, '032b')
-        # Print the address and the data
-        f.write(f"0x{address:08X}:0b{data_binary}")
-        f.write('\n')
+#         # Format the data as 32-bit binary
+#         data_binary = format(data, '032b')
+#         # Print the address and the data
+#         f.write(f"0x{address:08X}:0b{data_binary}")
+#         f.write('\n')
 
 
 def PC_dump(PC, f):    #Dump the program counter (PC) value.
 
     PC_register = (list(binary(PC)))
     string = "".join(PC_register)
-    f.write(string + " ")
+    f.write("0b" + string + " ")
 
 
 def reg_dump(reg_value, f):    #Dump the register values.
 
     for register in reg_value:
         if (register!='zero'):
-            f.write(binary(reg_value[register]) + " ")
+            f.write("0b" + binary(reg_value[register]) + " ")
 
     f.write('\n')
 
@@ -77,7 +87,9 @@ def ee_execute(Instruction, PC, mem_store, reg_value):  #Execute the given instr
     halt = False
     x = []
     y = []
-    check = 0
+
+    if Instruction == '00000000000000000000000001100011':
+        halt = True
 
     cycle += 1
     y.append(PC)
@@ -105,24 +117,24 @@ def ee_execute(Instruction, PC, mem_store, reg_value):  #Execute the given instr
                 reg_value[rd] = unsigned(reg_twos) + rs1
             else:
                 reg_value[rd] = rs1 - rs2
-                mem_store[rd] = rs1 - rs2
+                #mem_store[rd] = rs1 - rs2
         else:
             # Addition
             if funct3 == '000':
                 reg_value[rd] = rs2 + rs1
-                mem_store[rd] = rs1 + rs2
+                #mem_store[rd] = rs1 + rs2
                 #print(reg_value[rd]) debug statement;
             # Shift left logical
             elif funct3 == '001':
                 shift_val = rs2 & 0b11111
                 reg_value[rd] = rs1 << shift_val
-                mem_store[rd] = rs1 << shift_val
+                #mem_store[rd] = rs1 << shift_val
 
             # Shift right logical
             elif funct3 == '101':
                 shift_val = rs2 & 0b11111
                 reg_value[rd] = rs1 >> shift_val
-                mem_store[rd] = rs1 >> shift_val
+                #mem_store[rd] = rs1 >> shift_val
             # Bitwise XOR
             elif funct3 == '100':
                 reg_value[rd] = rs1 ^ rs2
@@ -168,26 +180,24 @@ def ee_execute(Instruction, PC, mem_store, reg_value):  #Execute the given instr
             if unsigned(rs1) >= unsigned(rs2):
                 PC += imm_value
 
-    # # S-type instruction handling
-    # elif opcode == '0100011':  # sw
-    #     imm_11_5 = int(Instruction[25:32])
-    #     rs2_addr = Instruction[20:25]
-    #     rs1_addr = Instruction[15:20]
-    #     imm_4_0 = int(Instruction[7:12])
-    #     imm = sign_extend((imm_11_5 + (imm_4_0 << 5), 2), 12)
-    #     rs2 = reg_value[registers_Dictionary[rs2_addr]]
-    #     rs1 = reg_value[registers_Dictionary[rs1_addr]]
-    #     mem_store[rs1 + imm] = rs2
-
      # S-type instruction handling
     elif opcode == '0100011':  # sw
-        imm_11_5 = int(Instruction[25:32], 2)
-        rs2_addr = Instruction[20:25]
-        rs1_addr = Instruction[15:20]
-        imm_4_0 = int(Instruction[7:12], 2)
-        imm = sign_extend(imm_11_5 + (imm_4_0 << 5), 12)
+        imm_11_5 = Instruction[0:7]
+        rs2_addr = Instruction[7:12]
+        rs1_addr = Instruction[12:17]
+        imm_4_0 = Instruction[20:25]
+        imm = int((imm_11_5 + imm_4_0),2)
         rs2 = reg_value[registers_Dictionary[rs2_addr]]
         rs1 = reg_value[registers_Dictionary[rs1_addr]]
+        int1=(rs1+imm)
+        bin1=binary(int1)
+        hex1=convert_to_hex(str(bin1))
+        hex_str="0x"+str(hex1)
+
+        for key in mem_store:
+            if key==hex_str:
+                mem_store[key]=binary(rs2)
+                break
 
     # U-type instruction handling
     elif opcode == '0110111':  # lui
@@ -195,14 +205,14 @@ def ee_execute(Instruction, PC, mem_store, reg_value):  #Execute the given instr
         imm = Instruction[0:20]
         rd = registers_Dictionary[rd_addr]
         reg_value[rd] = sign_extend(int(imm, 2), 20)
-        mem_store[rd] = reg_value[rd]
+        #mem_store[rd] = reg_value[rd]
 
     elif opcode == '0010111':  # auipc
         rd_addr = Instruction[20:25]
         imm = Instruction[0:20]
         rd = registers_Dictionary[rd_addr]
         reg_value[rd] = PC + sign_extend(int(imm, 2), 20)
-        mem_store[rd] = reg_value[rd]
+        #mem_store[rd] = reg_value[rd]
     # J-type instruction handling
     elif opcode == '1101111':
         rd_addr = Instruction[20:25]
@@ -226,7 +236,7 @@ def ee_execute(Instruction, PC, mem_store, reg_value):  #Execute the given instr
         rs1 = reg_value[registers_Dictionary[rs1_addr]]
         address = rs1 + sign_extend(int(imm, 2), 12)
         reg_value[rd] = mem_store.get(address, 0)  # Using 0 as a default value
-        mem_store[address] = reg_value[rd]
+        #mem_store[address] = reg_value[rd]
     elif opcode == '0010011':
         rd_addr = Instruction[20:25]
         rs1_addr = Instruction[12:17]
@@ -245,7 +255,7 @@ def ee_execute(Instruction, PC, mem_store, reg_value):  #Execute the given instr
         rd = registers_Dictionary[rd_addr]
         rs1 = reg_value[registers_Dictionary[rs1_addr]]
         reg_value[rd] = PC + 4
-        mem_store[rd] = reg_value[rd]
+        #mem_store[rd] = reg_value[rd]
         PC = (rs1 + sign_extend(int(imm, 2), 12)) & 0xFFFFFFFE  # Make LSB 0
 
     return PC, mem_store, reg_value, halt
@@ -265,7 +275,7 @@ with open(input_file, 'r') as f:
 
 instructions = input_data.split("\n")
 
-mem_store = {i: 0 for i in range(32)}
+#mem_store = {i: 0 for i in range(32)}
 PC = 4
 halt = False
 
@@ -288,4 +298,8 @@ with open(output_file, 'w') as f:
         if PC >= len(instructions):
             break
 
-    mem_dump(mem_store, 0x0010000, 0x0001007C, f)
+with open(output_file, 'a') as f:
+    for key in mem_store:
+        f.write(key + ":" + mem_store[key] + '\n')
+
+# mem_dump(mem_store, 0x0010000, 0x0001007C)
